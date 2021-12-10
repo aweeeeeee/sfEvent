@@ -1,0 +1,169 @@
+<aura:component controller="DataAccountController" 
+                implements="force:appHostable,flexipage:availableForAllPageTypes" 
+                access="global">
+	<!-- attributes -->
+    <aura:attribute name="allData" type="List" />
+    <aura:attribute name="data" 
+                    type="List"/>
+    <aura:attribute name="columns" 
+                    type="List"/>
+    <aura:attribute name="isOpen" 
+                    type="boolean" 
+                    default="false"/>
+    <aura:attribute name="accountObj" 
+                    type="Account" 
+                    default="{'sobjectType':'Account',
+                                            'Name':'',
+                                            'Phone':'',
+                                            'Type':'',
+                                            'Industry':''}"/>
+    
+    <aura:attribute name="accountId" 
+                    type="String"/>    
+    <aura:handler name="init" 
+                  value="{!this}" 
+                  action="{!c.doInit}" /> 
+    <aura:attribute name="typeVal" 
+                    type="List"/>
+    <aura:attribute name="industryVal" 
+                    type="List"/>
+    
+    <!--Use "slds-m-around_xx-large" class to add standard X-Large padding to the component--> 
+    
+    <div class="slds-m-around_xx-large">
+
+        <!--Use aura:if tag to display Model Box, on the bese of conditions. [isOpen boolean attribute] -->   
+        <aura:if isTrue="{!v.isOpen}">
+            
+            <!--###### MODAL BOX Start######--> 
+            <section role="dialog" 
+                     tabindex="-1" 
+                     aria-labelledby="modal-heading-01" 
+                     aria-modal="true" 
+                     aria-describedby="modal-content-id-1" 
+                     class="slds-modal slds-fade-in-open">
+                <div class="slds-modal__container">
+                    <!-- ###### MODAL BOX HEADER Start ######-->
+                    
+                    <!--###### MODAL BOX BODY Part Start######-->
+                    <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                        
+                         <lightning:input value="{!v.accountObj.Name}" 
+                                          label="Account Name" 
+                                          placeholder="Enter Account Name" 
+                                          pattern="[a-zA-Z-0-9]*" 
+                 						  messageWhenPatternMismatch="Please use only letters or number." 
+                                          required="true"
+                                          aura:id="myinput"/>
+                        
+                         <lightning:input value="{!v.accountObj.Phone}" 
+                                          label="Phone" 
+                                          placeholder="Enter your Phone Number"
+                                          pattern="[0-9]*" 
+                 						  messageWhenPatternMismatch="Please use only numbers."/>
+                        
+                         <lightning:select value="{!v.accountObj.Type}" 
+                                           label="Type" 
+                                           onchange="{!c.doInit}" 
+                                           aura:id="type" 
+                                           name="type" 
+                                           required="true"> 
+                                <option value="">--None--</option>
+                                <aura:iteration items="{!v.typeVal}" 
+                                                var="s">
+                                        <option value="{!s}" >{!s}</option>
+                                </aura:iteration> 
+                        </lightning:select> 
+                        <lightning:select value="{!v.accountObj.Industry}" 
+                                          label="Industry" 
+                                          onchange="{!c.doInit}" 
+                                          aura:id="industry" 
+                                          name="industry" 
+                                          required="true"> 
+                                <option value="">--None--</option>
+                                <aura:iteration items="{!v.industryVal}" 
+                                                var="s">
+                                        <option value="{!s}">{!s}</option>
+                                </aura:iteration> 
+                        </lightning:select> 
+                        
+                    </div>
+                    <!--###### MODAL BOX FOOTER Part Start ######-->
+                    <footer class="slds-modal__footer">
+                        <lightning:button variant="neutral" 
+                                          label="Cancel"
+                                          title="Cancel"
+                                          onclick="{! c.closeModel }"/>
+                        <lightning:button variant="brand" 
+                                          label="Save"
+                                          title="Save"
+                                          onclick="{! c.doSave }"/>
+                    </footer>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+            <!--###### MODAL BOX Part END Here ######-->
+            
+        </aura:if>
+    </div>
+
+    <aura:handler name="init" 
+                  value="{!this}" 
+                  action="{!c.onInit}" />
+	
+    <div class="c-container">
+        <lightning:layout class="slds-page-header slds-page-header_object-home">
+            <lightning:layoutItem>
+               <lightning:layout>
+             	<lightning:layoutItem>
+                	<lightning:icon iconName="standard:account" />
+                </lightning:layoutItem>
+                <lightning:layoutItem padding="horizontal-small">
+                    <div class="page-section page-header">
+                        <h2 class="slds-text-heading_medium">Accounts</h2>
+                    </div>
+                </lightning:layoutItem>
+             </lightning:layout>
+            </lightning:layoutItem>
+           
+            <lightning:layoutItem  alignmentBump="left">
+                <lightning:input type="search"
+                                 placeholder="Search from Accounts" 
+                                 aura:id="SearchBox"
+                                 variant="label-hidden"
+                         		 onchange="{!c.searchTable}" 
+                                 class="slds-m-horizontal_small"/>
+            </lightning:layoutItem>
+            <lightning:layoutItem >
+                <lightning:button variant="brand"
+                          label="New Accounts"
+                          title="New Accounts"
+                          onclick="{! c.openModel }" />
+            </lightning:layoutItem>
+        </lightning:layout>
+    </div>
+    
+     <!-- the container element determine the height of the datatable -->
+    <div style="height: 350px; width: 100%;">
+        <lightning:datatable
+                keyField="id"
+                data="{! v.data }"
+                columns="{! v.columns }"
+                hideCheckboxColumn="true"
+                showRowNumberColumn="true"
+                onrowaction="{!c.handleRowAction}" />
+    </div>
+    <div class="slds-m-vertical_small">
+    	<lightning:button variant="neutral" 
+                      label="Refresh Table"
+                      title="Refresh"
+                      onclick="{!c.showAccounts }"/>
+    
+     <lightning:button variant="brand" 
+                      aura:id="saveAll"
+                      label="Save All" 
+                      disabled="false"
+                      onclick="{!c.changeAccStatus}"/>
+    </div>
+	
+</aura:component>
